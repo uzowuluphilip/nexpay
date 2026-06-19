@@ -239,7 +239,7 @@ export default function SignUpPage() {
               to="/login"
               className="text-primary-500 hover:text-primary-600 font-semibold"
             >
-              {t('auth.logIn')}
+              {t('common.logIn')}
             </Link>
           </p>}
         
@@ -250,7 +250,7 @@ export default function SignUpPage() {
                 to="/login"
                 className="text-primary-500 hover:text-primary-600 font-semibold"
               >
-                {t('auth.logIn')} now
+                {t('common.logIn')} now
               </Link>
             </p>
           )}
