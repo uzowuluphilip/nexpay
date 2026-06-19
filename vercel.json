@@ -2,7 +2,9 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "env": {
-    "VITE_API_URL": ""
+    "VITE_API_URL": "",
+    "VITE_SUPABASE_URL": "https://vjtgekqqleegviziyvsb.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "sb_publishable_ef1Q6O9JwUaldQcukdFsiQ_QvTU6608"
   },
   "rewrites": [
     {
