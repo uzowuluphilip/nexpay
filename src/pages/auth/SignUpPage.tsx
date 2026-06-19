@@ -70,8 +70,7 @@ export default function SignUpPage() {
       }
 
       // Create profile via API (using service role to bypass RLS)
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-      const profileResponse = await fetch(`${apiUrl}/api/auth/create-profile`, {
+      const profileResponse = await fetch('/api/auth/create-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -56,8 +56,7 @@ export default function CreateSavingsPlanForm({ currentBalance, onSuccess }: Cre
         throw new Error('Not authenticated')
       }
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-      const response = await fetch(`${apiUrl}/api/savings/create-plan`, {
+      const response = await fetch('/api/savings/create-plan', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
