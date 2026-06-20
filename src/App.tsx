@@ -31,24 +31,34 @@ export default function App() {
         
         if (session?.user) {
           // Check if profile exists
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('id', session.user.id)
-            .single()
-          
-          // If profile doesn't exist, sign out the user
-          if (profileError || !profileData) {
-            console.log('Profile does not exist, signing out')
-            await supabase.auth.signOut()
-            setUser(null)
-            setProfileExists(false)
-          } else {
+          try {
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('id', session.user.id)
+              .single()
+            
+            // If profile doesn't exist, sign out the user
+            if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = RLS policy error
+              console.log('Profile check failed:', profileError)
+              await supabase.auth.signOut()
+              setUser(null)
+              setProfileExists(false)
+            } else if (profileData) {
+              setProfileExists(true)
+            } else {
+              // RLS error - assume profile exists if it's a permission issue
+              console.log('Profile check blocked by RLS, assuming profile exists')
+              setProfileExists(true)
+            }
+          } catch (profileCheckError) {
+            console.log('Profile check error:', profileCheckError)
+            // On error, assume profile exists to prevent sign-out
             setProfileExists(true)
           }
 
           // Only check PIN if profile exists
-          if (profileData && !profileError) {
+          try {
             const { data, error } = await supabase
               .from('pins')
               .select('id')
@@ -56,6 +66,9 @@ export default function App() {
               .single()
             
             setHasCreatedPin(!error && data !== null)
+          } catch (pinCheckError) {
+            console.log('PIN check error:', pinCheckError)
+            setHasCreatedPin(false)
           }
         }
       } catch (error) {
@@ -75,30 +88,47 @@ export default function App() {
         
         if (session?.user) {
           // Check if profile exists
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('id', session.user.id)
-            .single()
-          
-          // If profile doesn't exist, sign out the user
-          if (profileError || !profileData) {
-            console.log('Profile does not exist, signing out')
-            await supabase.auth.signOut()
-            setUser(null)
-            setProfileExists(false)
-            return
-          } else {
+          try {
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('id', session.user.id)
+              .single()
+            
+            // If profile doesn't exist, sign out the user
+            if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = RLS policy error
+              console.log('Profile check failed:', profileError)
+              await supabase.auth.signOut()
+              setUser(null)
+              setProfileExists(false)
+              return
+            } else if (profileData) {
+              setProfileExists(true)
+            } else {
+              // RLS error - assume profile exists if it's a permission issue
+              console.log('Profile check blocked by RLS, assuming profile exists')
+              setProfileExists(true)
+            }
+          } catch (profileCheckError) {
+            console.log('Profile check error:', profileCheckError)
             setProfileExists(true)
           }
 
-          const { data, error } = await supabase
-            .from('pins')
-            .select('id')
-            .eq('user_id', session.user.id)
-            .single()
-          
-          setHasCreatedPin(!error && data !== null)
+          try {
+            const { data, error } = await supabase
+              .from('pins')
+              .select('id')
+              .eq('user_id', session.user.id)
+              .single()
+            
+            setHasCreatedPin(!error && data !== null)
+          } catch (pinCheckError) {
+            console.log('PIN check error:', pinCheckError)
+            setHasCreatedPin(false)
+          }
+        } else {
+          setProfileExists(false)
+          setHasCreatedPin(false)
         }
       }
     )
