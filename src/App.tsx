@@ -38,37 +38,48 @@ export default function App() {
               .eq('id', session.user.id)
               .single()
             
-            // If profile doesn't exist, sign out the user
-            if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = RLS policy error
-              console.log('Profile check failed:', profileError)
-              await supabase.auth.signOut()
-              setUser(null)
-              setProfileExists(false)
+            // If we get an error, assume profile exists (RLS policies might block reads)
+            // Only sign out if it's a "not found" error (PGRST116)
+            if (profileError) {
+              if (profileError.code === 'PGRST116') {
+                // Profile truly doesn't exist
+                console.log('Profile does not exist, signing out')
+                await supabase.auth.signOut()
+                setUser(null)
+                setProfileExists(false)
+              } else {
+                // Other error (likely RLS), assume profile exists
+                console.log('Profile check error (likely RLS):', profileError.code, profileError.message)
+                setProfileExists(true)
+              }
             } else if (profileData) {
               setProfileExists(true)
             } else {
-              // RLS error - assume profile exists if it's a permission issue
-              console.log('Profile check blocked by RLS, assuming profile exists')
+              // No error but no data - shouldn't happen, assume profile exists
+              console.log('Profile check returned no data')
               setProfileExists(true)
             }
           } catch (profileCheckError) {
-            console.log('Profile check error:', profileCheckError)
-            // On error, assume profile exists to prevent sign-out
+            console.log('Profile check exception:', profileCheckError)
+            // Exception - assume profile exists to prevent sign-out
             setProfileExists(true)
           }
 
           // Only check PIN if profile exists
-          try {
-            const { data, error } = await supabase
-              .from('pins')
-              .select('id')
-              .eq('user_id', session.user.id)
-              .single()
-            
-            setHasCreatedPin(!error && data !== null)
-          } catch (pinCheckError) {
-            console.log('PIN check error:', pinCheckError)
-            setHasCreatedPin(false)
+          if (true) {
+            // Always check PIN since we assume profile exists
+            try {
+              const { data, error } = await supabase
+                .from('pins')
+                .select('id')
+                .eq('user_id', session.user.id)
+                .single()
+              
+              setHasCreatedPin(!error && data !== null)
+            } catch (pinCheckError) {
+              console.log('PIN check error:', pinCheckError)
+              setHasCreatedPin(false)
+            }
           }
         }
       } catch (error) {
@@ -96,17 +107,24 @@ export default function App() {
               .single()
             
             // If profile doesn't exist, sign out the user
-            if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = RLS policy error
-              console.log('Profile check failed:', profileError)
-              await supabase.auth.signOut()
-              setUser(null)
-              setProfileExists(false)
-              return
+            if (profileError) {
+              if (profileError.code === 'PGRST116') {
+                // Profile truly doesn't exist
+                console.log('Profile does not exist, signing out')
+                await supabase.auth.signOut()
+                setUser(null)
+                setProfileExists(false)
+                return
+              } else {
+                // Other error (likely RLS), assume profile exists
+                console.log('Profile check error (likely RLS):', profileError.code)
+                setProfileExists(true)
+              }
             } else if (profileData) {
               setProfileExists(true)
             } else {
-              // RLS error - assume profile exists if it's a permission issue
-              console.log('Profile check blocked by RLS, assuming profile exists')
+              // No error but no data - shouldn't happen, assume profile exists
+              console.log('Profile check returned no data')
               setProfileExists(true)
             }
           } catch (profileCheckError) {
