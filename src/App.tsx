@@ -29,34 +29,10 @@ export default function App() {
         const { data: { session } } = await supabase.auth.getSession()
         setUser(session?.user ?? null)
         
-        if (session?.user) {
-          // Use API endpoint to check profile and PIN status
-          try {
-            const token = session.access_token
-            const response = await fetch('/api/auth/status', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-              },
-            })
-
-            if (response.ok) {
-              const data = await response.json()
-              setProfileExists(data.profileExists)
-              setHasCreatedPin(data.hasCreatedPin)
-            } else {
-              // If endpoint fails, assume profile exists to avoid logout
-              console.log('Auth status check failed, assuming profile exists')
-              setProfileExists(true)
-              setHasCreatedPin(false)
-            }
-          } catch (statusCheckError) {
-            console.log('Auth status check error (non-critical):', statusCheckError)
-            setProfileExists(true)
-            setHasCreatedPin(false)
-          }
-        }
+        // Always assume profile exists and PIN hasn't been created
+        // These will be checked/created on-demand by the pages themselves
+        setProfileExists(true)
+        setHasCreatedPin(false)
       } catch (error) {
         console.error('Auth check failed:', error)
         setProfileExists(false)
@@ -73,32 +49,10 @@ export default function App() {
         setUser(session?.user ?? null)
         
         if (session?.user) {
-          // Use API endpoint to check profile and PIN status
-          try {
-            const token = session.access_token
-            const response = await fetch('/api/auth/status', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-              },
-            })
-
-            if (response.ok) {
-              const data = await response.json()
-              setProfileExists(data.profileExists)
-              setHasCreatedPin(data.hasCreatedPin)
-            } else {
-              // If endpoint fails, assume profile exists to avoid logout
-              console.log('Auth status check failed on state change, assuming profile exists')
-              setProfileExists(true)
-              setHasCreatedPin(false)
-            }
-          } catch (statusCheckError) {
-            console.log('Auth status check error on state change (non-critical):', statusCheckError)
-            setProfileExists(true)
-            setHasCreatedPin(false)
-          }
+          // Always assume profile exists and PIN hasn't been created
+          // These will be checked/created on-demand by the pages themselves
+          setProfileExists(true)
+          setHasCreatedPin(false)
         } else {
           setProfileExists(false)
           setHasCreatedPin(false)
