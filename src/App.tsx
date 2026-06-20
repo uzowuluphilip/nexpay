@@ -23,7 +23,7 @@ export default function App() {
   const [profileExists, setProfileExists] = useState(false)
 
   useEffect(() => {
-    // Check if user is logged in
+    // Check if user is logged in and if they have created a PIN
     const checkAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
@@ -35,7 +35,21 @@ export default function App() {
         if (session?.user) {
           setUser(session.user)
           setProfileExists(true)
-          setHasCreatedPin(false)
+          
+          // Check if user has created a PIN
+          const { data: pinData, error: pinError } = await supabase
+            .from('pins')
+            .select('id')
+            .eq('user_id', session.user.id)
+            .maybeSingle()
+          
+          if (pinError) {
+            console.error('Error checking PIN status:', pinError)
+            setHasCreatedPin(false)
+          } else {
+            setHasCreatedPin(!!pinData)
+            console.log('[App Auth] PIN status:', { hasPIN: !!pinData })
+          }
         } else {
           setUser(null)
           setProfileExists(false)
@@ -62,7 +76,21 @@ export default function App() {
         if (session?.user) {
           setUser(session.user)
           setProfileExists(true)
-          setHasCreatedPin(false)
+          
+          // Check if user has created a PIN
+          const { data: pinData, error: pinError } = await supabase
+            .from('pins')
+            .select('id')
+            .eq('user_id', session.user.id)
+            .maybeSingle()
+          
+          if (pinError) {
+            console.error('Error checking PIN status:', pinError)
+            setHasCreatedPin(false)
+          } else {
+            setHasCreatedPin(!!pinData)
+            console.log('[App Auth] PIN status after auth change:', { hasPIN: !!pinData })
+          }
         } else {
           setUser(null)
           setProfileExists(false)
