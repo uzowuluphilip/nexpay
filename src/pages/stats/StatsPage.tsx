@@ -96,10 +96,10 @@ export default function StatsPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-10"
         >
-          <h1 className="text-4xl sm:text-5xl font-bold mb-2">{t('stats.title') || 'Your Statistics'}</h1>
-          <p className="text-gray-600 dark:text-gray-400">Track your financial performance and progress</p>
+          <h1 className="text-5xl sm:text-6xl font-bold mb-3 bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-200 bg-clip-text text-transparent">{t('stats.title') || 'Your Statistics'}</h1>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">Track your financial performance and progress</p>
         </motion.div>
 
         {/* Stats Grid */}

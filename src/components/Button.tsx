@@ -43,16 +43,16 @@ export function Button({
     lg: `padding: ${SPACING.base}px ${SPACING.lg}px`,
   };
 
-  // Variant styles
+  // Variant styles - Enhanced with gradients and better effects
   const variantClasses = {
     primary:
-      'bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-lg',
+      'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl',
     secondary:
-      'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold',
+      'bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-700 text-gray-900 dark:text-white font-semibold',
     outline:
-      'border-2 border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-semibold',
+      'border-2 border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 font-semibold backdrop-blur-sm',
     ghost:
-      'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800',
+      'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium',
   };
 
   const Component = animated ? motion.button : 'button';

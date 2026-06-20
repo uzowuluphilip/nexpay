@@ -72,12 +72,16 @@ export default function ProfilePage() {
     <AuthenticatedLayout>
       <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Header Card */}
-        <div className="bg-gradient-primary text-white rounded-2xl p-8 shadow-xl mb-6 text-center">
-          <div className="w-16 h-16 bg-white/20 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-3xl font-bold">{profile.full_name?.charAt(0).toUpperCase() || 'U'}</span>
+        <div className="bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600 text-white rounded-3xl p-8 shadow-2xl mb-8 text-center backdrop-blur-xl border border-purple-400/20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-300/10 rounded-full blur-2xl -mr-16 -mt-16" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-300/10 rounded-full blur-2xl -ml-12 -mb-12" />
+          <div className="relative z-10">
+            <div className="w-20 h-20 bg-white/15 backdrop-blur-md rounded-full mx-auto mb-4 flex items-center justify-center border border-white/30 shadow-lg">
+              <span className="text-4xl font-bold">{profile.full_name?.charAt(0).toUpperCase() || 'U'}</span>
+            </div>
+            <h1 className="text-3xl font-bold mb-2 drop-shadow-lg">{profile.full_name || 'User'}</h1>
+            <p className="text-white/70 text-sm font-medium">{profile.email}</p>
           </div>
-          <h1 className="text-2xl font-bold mb-2">{profile.full_name || 'User'}</h1>
-          <p className="text-white/80">{profile.email}</p>
         </div>
 
         {/* Profile Information */}
