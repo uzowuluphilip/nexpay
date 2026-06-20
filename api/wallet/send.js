@@ -66,10 +66,10 @@ export default async function handler(req, res) {
     }
 
     // Validate request body
-    const { account_number, bank_name, amount, pin, description } = req.body;
+    const { recipient_account_number, bank_name, amount, pin, description } = req.body;
 
-    if (!account_number || typeof account_number !== 'string') {
-      return res.status(400).json({ error: 'Invalid account number' });
+    if (!recipient_account_number || typeof recipient_account_number !== 'string') {
+      return res.status(400).json({ error: 'Invalid recipient account number' });
     }
 
     if (!bank_name || typeof bank_name !== 'string') {
@@ -77,7 +77,7 @@ export default async function handler(req, res) {
     }
 
     if (!amount || typeof amount !== 'number' || amount <= 0) {
-      return res.status(400).json({ error: 'Invalid withdrawal amount' });
+      return res.status(400).json({ error: 'Invalid transfer amount' });
     }
 
     if (!pin || typeof pin !== 'string') {
@@ -91,20 +91,21 @@ export default async function handler(req, res) {
     }
 
     // Verify PIN (in a real app, this would verify against the hashed PIN)
-    console.log('[withdraw] PIN verified for user:', user.id);
+    // For now, we'll accept any PIN as this is a simulated environment
+    console.log('[send] PIN verified for user:', user.id);
 
-    // Create withdrawal transaction
+    // Create send transaction
     const { data: transaction, error: txError } = await supabase
       .from('transactions')
       .insert([
         {
           user_id: user.id,
-          type: 'withdraw',
+          type: 'send',
           amount: amount,
           status: 'completed',
           description: description || null,
           metadata: {
-            account_number,
+            recipient_account_number,
             bank_name,
           },
         }
@@ -113,21 +114,22 @@ export default async function handler(req, res) {
       .single();
 
     if (txError) {
-      console.error('[withdraw] Transaction insert error:', txError);
+      console.error('[send] Transaction insert error:', txError);
       throw txError;
     }
 
     // Calculate and return new balance
-    const balance = await getUserBalance(user.id);
+    const newBalance = await getUserBalance(user.id);
 
     return res.status(200).json({
       success: true,
-      transaction: transaction.id,
-      balance: balance,
-      amount: amount,
+      transaction_id: transaction.id,
+      balance: newBalance,
+      message: `Successfully sent $${amount.toFixed(2)} to ${bank_name} (${recipient_account_number})`
     });
+
   } catch (error) {
-    console.error('[withdraw] Error:', error);
-    return res.status(500).json({ error: 'Internal server error', details: error.message });
+    console.error('[send] Error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }

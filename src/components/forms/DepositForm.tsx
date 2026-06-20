@@ -5,9 +5,10 @@ import { formatCurrencyDisplay } from '@/utils/calculations'
 
 interface DepositFormProps {
   onSuccess?: () => void
+  userAccountNumber?: string
 }
 
-export default function DepositForm({ onSuccess }: DepositFormProps) {
+export default function DepositForm({ onSuccess, userAccountNumber }: DepositFormProps) {
   const { t } = useTranslation()
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
@@ -83,6 +84,15 @@ export default function DepositForm({ onSuccess }: DepositFormProps) {
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-400">
           {error}
+        </div>
+      )}
+
+      {userAccountNumber && (
+        <div>
+          <label className="block text-sm font-medium mb-2">Your Account Number</label>
+          <div className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600">
+            <p className="text-sm font-mono font-medium">{userAccountNumber}</p>
+          </div>
         </div>
       )}
 

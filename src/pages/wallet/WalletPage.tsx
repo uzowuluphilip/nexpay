@@ -10,7 +10,7 @@ import { AnimatedNumber } from '@/components/AnimatedNumber'
 import { cardVariants, containerVariants } from '@/utils/animations'
 import { SPACING, ICON_SIZE, RADIUS } from '@/utils/design-constants'
 import { useLoadingState } from '@/hooks/useAnimations'
-import { useTransactions } from '@/hooks/useData'
+import { useTransactions, useUserProfile } from '@/hooks/useData'
 import { calculateTotalBalance, formatCurrencyDisplay } from '@/utils/calculations'
 import AuthenticatedLayout from '@/components/layouts/AuthenticatedLayout'
 import DepositForm from '@/components/forms/DepositForm'
@@ -21,6 +21,7 @@ export default function WalletPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { data: transactions = [], refetch, isLoading } = useTransactions()
+  const { data: profile } = useUserProfile()
   const totalBalance = calculateTotalBalance(transactions)
   const displayLoading = useLoadingState(isLoading, 300)
 
@@ -178,6 +179,7 @@ export default function WalletPage() {
                 <div className="space-y-6">
                   <h3 className="text-2xl font-bold">{t('wallet.deposit')}</h3>
                   <DepositForm 
+                    userAccountNumber={profile?.account_number}
                     onSuccess={() => { 
                       setActiveTab('balance')
                       refetch()

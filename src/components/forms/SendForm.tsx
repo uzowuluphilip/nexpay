@@ -11,7 +11,8 @@ interface SendFormProps {
 
 export default function SendForm({ currentBalance, onSuccess }: SendFormProps) {
   const { t } = useTranslation()
-  const [recipientEmail, setRecipientEmail] = useState('')
+  const [recipientAccountNumber, setRecipientAccountNumber] = useState('')
+  const [bankName, setBankName] = useState('')
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [showPINModal, setShowPINModal] = useState(false)
@@ -24,8 +25,13 @@ export default function SendForm({ currentBalance, onSuccess }: SendFormProps) {
     e.preventDefault()
     setError(null)
 
-    if (!recipientEmail) {
-      setError('recipient account number')
+    if (!recipientAccountNumber) {
+      setError('Please enter recipient account number')
+      return
+    }
+
+    if (!bankName) {
+      setError('Please enter bank name')
       return
     }
 
@@ -59,7 +65,8 @@ export default function SendForm({ currentBalance, onSuccess }: SendFormProps) {
           'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          recipient_email: recipientEmail,
+          recipient_account_number: recipientAccountNumber,
+          bank_name: bankName,
           amount: parseFloat(amount),
           pin,
           description,
@@ -74,7 +81,8 @@ export default function SendForm({ currentBalance, onSuccess }: SendFormProps) {
 
       setSuccess(true)
       setNewBalance(data.balance)
-      setRecipientEmail('')
+      setRecipientAccountNumber('')
+      setBankName('')
       setAmount('')
       setDescription('')
       setShowPINModal(false)
@@ -95,7 +103,7 @@ export default function SendForm({ currentBalance, onSuccess }: SendFormProps) {
       <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-6 text-center">
         <div className="text-4xl mb-2">✅</div>
         <h3 className="font-bold text-lg mb-2">Transfer Successful</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Sent {formatCurrencyDisplay(parseFloat(amount))} to {recipientEmail}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Sent {formatCurrencyDisplay(parseFloat(amount))} to {bankName} ({recipientAccountNumber})</p>
         <p className="text-sm font-medium">New Balance: {formatCurrencyDisplay(newBalance)}</p>
       </div>
     )
@@ -111,13 +119,25 @@ export default function SendForm({ currentBalance, onSuccess }: SendFormProps) {
         )}
 
         <div>
-          <label className="block text-sm font-medium mb-2">Recipient Account Nuunber</label>
+          <label className="block text-sm font-medium mb-2">Recipient Account Number</label>
           <input
-            type="email"
-            value={recipientEmail}
-            onChange={(e) => setRecipientEmail(e.target.value)}
+            type="text"
+            value={recipientAccountNumber}
+            onChange={(e) => setRecipientAccountNumber(e.target.value)}
             disabled={isLoading}
-            placeholder="account number"
+            placeholder="e.g., 1234567890"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:border-primary-500 focus:outline-none bg-white dark:bg-gray-800 disabled:opacity-50"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Bank Name</label>
+          <input
+            type="text"
+            value={bankName}
+            onChange={(e) => setBankName(e.target.value)}
+            disabled={isLoading}
+            placeholder="e.g., Chase Bank"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:border-primary-500 focus:outline-none bg-white dark:bg-gray-800 disabled:opacity-50"
           />
         </div>
@@ -159,7 +179,7 @@ export default function SendForm({ currentBalance, onSuccess }: SendFormProps) {
 
         <button
           type="submit"
-          disabled={!recipientEmail || !amount || isLoading}
+          disabled={!recipientAccountNumber || !bankName || !amount || isLoading}
           className="w-full px-4 py-3 bg-gradient-primary text-white rounded-lg font-medium hover:shadow-lg disabled:opacity-50 transition-shadow"
         >
           {isLoading ? 'Processing...' : 'Send'}
