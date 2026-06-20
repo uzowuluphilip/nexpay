@@ -103,23 +103,11 @@ export default function App() {
           />
           <Route 
             path="/signup" 
-            element={
-              user 
-                ? hasCreatedPin 
-                  ? <Navigate to="/dashboard" replace /> 
-                  : <Navigate to="/create-pin" replace />
-                : <SignUpPage />
-            } 
+            element={<SignUpPage />}
           />
           <Route 
             path="/login" 
-            element={
-              user 
-                ? hasCreatedPin 
-                  ? <Navigate to="/dashboard" replace /> 
-                  : <Navigate to="/create-pin" replace />
-                : <LoginPage />
-            } 
+            element={<LoginPage />}
           />
 
           {/* PIN creation route - only for users without PIN */}
