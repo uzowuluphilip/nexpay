@@ -3,8 +3,12 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.VITE_SUPABASE_URL || ''
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
-console.log('[create-profile] Supabase URL:', supabaseUrl ? '✓ set' : '✗ missing')
-console.log('[create-profile] Service Role Key:', supabaseKey ? `✓ set (${supabaseKey.substring(0, 20)}...)` : '✗ missing')
+if (!supabaseUrl) {
+  console.error('[create-profile] ✗ VITE_SUPABASE_URL is not set')
+}
+if (!supabaseKey) {
+  console.error('[create-profile] ✗ SUPABASE_SERVICE_ROLE_KEY is not set - set this in Vercel Environment Variables!')
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
