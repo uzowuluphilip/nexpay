@@ -29,15 +29,23 @@ export default function App() {
         const { data: { session } } = await supabase.auth.getSession()
         const user = session?.user ?? null
         console.log('[App Auth] Session check:', { hasSession: !!session, user: user?.email || 'none' })
-        setUser(user)
         
-        // Always assume profile exists and PIN hasn't been created
-        // These will be checked/created on-demand by the pages themselves
-        setProfileExists(true)
-        setHasCreatedPin(false)
+        // CRITICAL: Only set user if session actually exists
+        // This prevents unauthenticated users from being treated as logged in
+        if (session?.user) {
+          setUser(session.user)
+          setProfileExists(true)
+          setHasCreatedPin(false)
+        } else {
+          setUser(null)
+          setProfileExists(false)
+          setHasCreatedPin(false)
+        }
       } catch (error) {
         console.error('Auth check failed:', error)
+        setUser(null)
         setProfileExists(false)
+        setHasCreatedPin(false)
       } finally {
         setLoading(false)
       }
@@ -49,14 +57,14 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('[App Auth] onAuthStateChange:', { event, user: session?.user?.email || 'none' })
-        setUser(session?.user ?? null)
         
+        // CRITICAL: Ensure user is ONLY set when session exists
         if (session?.user) {
-          // Always assume profile exists and PIN hasn't been created
-          // These will be checked/created on-demand by the pages themselves
+          setUser(session.user)
           setProfileExists(true)
           setHasCreatedPin(false)
         } else {
+          setUser(null)
           setProfileExists(false)
           setHasCreatedPin(false)
         }
@@ -100,11 +108,13 @@ export default function App() {
           <Route 
             path="/" 
             element={
-              user 
-                ? hasCreatedPin 
+              // CRITICAL: Unauthenticated visitors (user === null) MUST show landing page
+              // Only authenticated users should be redirected based on PIN status
+              !user 
+                ? <LandingPage />
+                : hasCreatedPin 
                   ? <Navigate to="/dashboard" replace /> 
                   : <Navigate to="/create-pin" replace />
-                : <LandingPage />
             } 
           />
           <Route 
