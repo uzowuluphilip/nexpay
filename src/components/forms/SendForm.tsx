@@ -25,7 +25,7 @@ export default function SendForm({ currentBalance, onSuccess }: SendFormProps) {
     setError(null)
 
     if (!recipientEmail) {
-      setError('Please enter a recipient email')
+      setError('recipient account number')
       return
     }
 
@@ -111,13 +111,13 @@ export default function SendForm({ currentBalance, onSuccess }: SendFormProps) {
         )}
 
         <div>
-          <label className="block text-sm font-medium mb-2">Recipient Email</label>
+          <label className="block text-sm font-medium mb-2">Recipient Account Nuunber</label>
           <input
             type="email"
             value={recipientEmail}
             onChange={(e) => setRecipientEmail(e.target.value)}
             disabled={isLoading}
-            placeholder="recipient@example.com"
+            placeholder="account number"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:border-primary-500 focus:outline-none bg-white dark:bg-gray-800 disabled:opacity-50"
           />
         </div>
