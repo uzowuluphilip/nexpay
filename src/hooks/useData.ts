@@ -7,18 +7,31 @@ export function useTransactions() {
   return useQuery({
     queryKey: ['transactions'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          console.log('Not authenticated for transactions query')
+          return []
+        }
 
-      const { data, error } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
 
-      if (error) throw error
-      return data as Transaction[]
+        if (error) {
+          console.error('Transactions query error:', error)
+          return [] // Return empty array on error instead of throwing
+        }
+        return data as Transaction[]
+      } catch (err) {
+        console.error('Transactions fetch exception:', err)
+        return [] // Return empty array on exception
+      }
     },
+    retry: 1,
+    staleTime: 30000, // 30 seconds
   })
 }
 
@@ -27,18 +40,31 @@ export function useSavingsPlans() {
   return useQuery({
     queryKey: ['savings_plans'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          console.log('Not authenticated for savings plans query')
+          return []
+        }
 
-      const { data, error } = await supabase
-        .from('savings_plans')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        const { data, error } = await supabase
+          .from('savings_plans')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
 
-      if (error) throw error
-      return data as SavingsPlan[]
+        if (error) {
+          console.error('Savings plans query error:', error)
+          return [] // Return empty array on error instead of throwing
+        }
+        return data as SavingsPlan[]
+      } catch (err) {
+        console.error('Savings plans fetch exception:', err)
+        return [] // Return empty array on exception
+      }
     },
+    retry: 1,
+    staleTime: 30000, // 30 seconds
   })
 }
 
@@ -47,17 +73,30 @@ export function useInvestmentHoldings() {
   return useQuery({
     queryKey: ['investment_holdings'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          console.log('Not authenticated for investment holdings query')
+          return []
+        }
 
-      const { data, error } = await supabase
-        .from('investment_holdings')
-        .select('*')
-        .eq('user_id', user.id)
+        const { data, error } = await supabase
+          .from('investment_holdings')
+          .select('*')
+          .eq('user_id', user.id)
 
-      if (error) throw error
-      return data as InvestmentHolding[]
+        if (error) {
+          console.error('Investment holdings query error:', error)
+          return [] // Return empty array on error instead of throwing
+        }
+        return data as InvestmentHolding[]
+      } catch (err) {
+        console.error('Investment holdings fetch exception:', err)
+        return [] // Return empty array on exception
+      }
     },
+    retry: 1,
+    staleTime: 30000, // 30 seconds
   })
 }
 
@@ -66,14 +105,24 @@ export function useMarketAssets() {
   return useQuery({
     queryKey: ['market_assets'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('market_assets')
-        .select('*')
-        .order('symbol', { ascending: true })
+      try {
+        const { data, error } = await supabase
+          .from('market_assets')
+          .select('*')
+          .order('symbol', { ascending: true })
 
-      if (error) throw error
-      return data as MarketAsset[]
+        if (error) {
+          console.error('Market assets query error:', error)
+          return [] // Return empty array on error instead of throwing
+        }
+        return data as MarketAsset[]
+      } catch (err) {
+        console.error('Market assets fetch exception:', err)
+        return [] // Return empty array on exception
+      }
     },
+    retry: 1,
+    staleTime: 60000, // 60 seconds - market data can be cached longer
   })
 }
 
@@ -82,22 +131,35 @@ export function useBalanceSnapshots(days = 90) {
   return useQuery({
     queryKey: ['balance_snapshots', days],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          console.log('Not authenticated for balance snapshots query')
+          return []
+        }
 
-      const fromDate = new Date()
-      fromDate.setDate(fromDate.getDate() - days)
+        const fromDate = new Date()
+        fromDate.setDate(fromDate.getDate() - days)
 
-      const { data, error } = await supabase
-        .from('balance_snapshots')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('recorded_at', fromDate.toISOString())
-        .order('recorded_at', { ascending: true })
+        const { data, error } = await supabase
+          .from('balance_snapshots')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('recorded_at', fromDate.toISOString())
+          .order('recorded_at', { ascending: true })
 
-      if (error) throw error
-      return data as BalanceSnapshot[]
+        if (error) {
+          console.error('Balance snapshots query error:', error)
+          return [] // Return empty array on error instead of throwing
+        }
+        return data as BalanceSnapshot[]
+      } catch (err) {
+        console.error('Balance snapshots fetch exception:', err)
+        return [] // Return empty array on exception
+      }
     },
+    retry: 1,
+    staleTime: 30000, // 30 seconds
   })
 }
 
@@ -106,36 +168,54 @@ export function useUserProfile() {
   return useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-      if (error) throw error
-      
-      let profile = data as UserProfile
-      
-      // Generate account number if it doesn't exist
-      if (!profile.account_number) {
-        const accountNumber = String(Math.floor(Math.random() * 10000000000)).padStart(10, '0')
-        const { data: updatedProfile, error: updateError } = await supabase
-          .from('profiles')
-          .update({ account_number: accountNumber })
-          .eq('id', user.id)
-          .select()
-          .single()
-        
-        if (!updateError && updatedProfile) {
-          profile = updatedProfile as UserProfile
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          console.log('Not authenticated for profile query')
+          throw new Error('Not authenticated')
         }
+
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+
+        if (error) {
+          console.error('Profile query error:', error)
+          throw error
+        }
+        
+        let profile = data as UserProfile
+        
+        // Generate account number if it doesn't exist
+        if (!profile.account_number) {
+          try {
+            const accountNumber = String(Math.floor(Math.random() * 10000000000)).padStart(10, '0')
+            const { data: updatedProfile, error: updateError } = await supabase
+              .from('profiles')
+              .update({ account_number: accountNumber })
+              .eq('id', user.id)
+              .select()
+              .single()
+            
+            if (!updateError && updatedProfile) {
+              profile = updatedProfile as UserProfile
+            }
+          } catch (updateErr) {
+            console.error('Failed to generate account number:', updateErr)
+            // Continue without updating - not critical
+          }
+        }
+        
+        return profile
+      } catch (err) {
+        console.error('Profile fetch exception:', err)
+        throw err
       }
-      
-      return profile
     },
+    retry: 1,
+    staleTime: 60000, // 60 seconds
   })
 }
 
