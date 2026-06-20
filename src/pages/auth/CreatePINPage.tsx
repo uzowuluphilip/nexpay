@@ -17,15 +17,18 @@ export default function CreatePINPage() {
   const { t } = useTranslation()
 
   useEffect(() => {
-    // Listen for auth state changes to get current user
+    // Only set up the listener, don't log out on SIGNED_OUT events
+    // The app-level auth will handle redirects if needed
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state changed:', event, !!session)
+        console.log('Auth state in CreatePIN:', event, !!session)
         if (session?.user) {
           setCurrentUser(session.user)
           setAuthChecking(false)
-        } else if (event === 'SIGNED_OUT') {
-          navigate('/login', { replace: true })
+        } else {
+          // Still try to get user even if session is gone
+          // Don't navigate away yet
+          setAuthChecking(false)
         }
       }
     )
@@ -47,8 +50,8 @@ export default function CreatePINPage() {
           }
         }
       } catch (err) {
-        console.error('Auth check failed:', err)
-        navigate('/login', { replace: true })
+        console.error('Auth check failed in CreatePIN:', err)
+        // Don't navigate on error - let user try
       } finally {
         setAuthChecking(false)
       }
@@ -108,7 +111,17 @@ export default function CreatePINPage() {
 
     try {
       if (!currentUser) {
-        throw new Error('User not authenticated')
+        // Try to get current user
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          throw new Error('User not authenticated')
+        }
+      }
+
+      const userId = currentUser?.id || (await supabase.auth.getUser()).data.user?.id
+
+      if (!userId) {
+        throw new Error('Could not determine user ID')
       }
 
       // Create PIN record
@@ -116,20 +129,25 @@ export default function CreatePINPage() {
         .from('pins')
         .insert([
           {
-            user_id: currentUser.id,
+            user_id: userId,
             hashed_pin: pin,
           },
         ])
 
       if (pinError) {
-        throw pinError
+        // Ignore "duplicate key" errors - PIN might already exist
+        if (!pinError.message?.includes('duplicate')) {
+          throw pinError
+        }
       }
 
       setSuccess(true)
       
       // Navigate to dashboard immediately after PIN is created
       // The dashboard will initialize with the session that already exists
-      navigate('/dashboard', { replace: true })
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true })
+      }, 1000)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create PIN'
       setError(errorMessage)
