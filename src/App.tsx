@@ -30,22 +30,30 @@ export default function App() {
         setUser(session?.user ?? null)
         
         if (session?.user) {
-          // Profile and PIN checks are non-critical - don't sign out on failures
-          // Just assume they exist to allow the user to proceed
-          setProfileExists(true)
-          
-          // Optionally check PIN status but don't fail if it errors
+          // Use API endpoint to check profile and PIN status
           try {
-            const { data } = await supabase
-              .from('pins')
-              .select('id')
-              .eq('user_id', session.user.id)
-              .single()
-            
-            setHasCreatedPin(data !== null)
-          } catch (pinCheckError) {
-            console.log('PIN check error (non-critical):', pinCheckError)
-            // Don't fail - user might not have created PIN yet
+            const token = session.access_token
+            const response = await fetch('/api/auth/status', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+            })
+
+            if (response.ok) {
+              const data = await response.json()
+              setProfileExists(data.profileExists)
+              setHasCreatedPin(data.hasCreatedPin)
+            } else {
+              // If endpoint fails, assume profile exists to avoid logout
+              console.log('Auth status check failed, assuming profile exists')
+              setProfileExists(true)
+              setHasCreatedPin(false)
+            }
+          } catch (statusCheckError) {
+            console.log('Auth status check error (non-critical):', statusCheckError)
+            setProfileExists(true)
             setHasCreatedPin(false)
           }
         }
@@ -65,20 +73,30 @@ export default function App() {
         setUser(session?.user ?? null)
         
         if (session?.user) {
-          // Profile and PIN checks are non-critical - don't sign out on failures
-          setProfileExists(true)
-          
-          // Optionally check PIN status but don't fail if it errors
+          // Use API endpoint to check profile and PIN status
           try {
-            const { data } = await supabase
-              .from('pins')
-              .select('id')
-              .eq('user_id', session.user.id)
-              .single()
-            
-            setHasCreatedPin(data !== null)
-          } catch (pinCheckError) {
-            console.log('PIN check error on auth change (non-critical):', pinCheckError)
+            const token = session.access_token
+            const response = await fetch('/api/auth/status', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+            })
+
+            if (response.ok) {
+              const data = await response.json()
+              setProfileExists(data.profileExists)
+              setHasCreatedPin(data.hasCreatedPin)
+            } else {
+              // If endpoint fails, assume profile exists to avoid logout
+              console.log('Auth status check failed on state change, assuming profile exists')
+              setProfileExists(true)
+              setHasCreatedPin(false)
+            }
+          } catch (statusCheckError) {
+            console.log('Auth status check error on state change (non-critical):', statusCheckError)
+            setProfileExists(true)
             setHasCreatedPin(false)
           }
         } else {
