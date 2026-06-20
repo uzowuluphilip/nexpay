@@ -50,28 +50,10 @@ export default function LoginPage() {
         throw new Error('Sign in failed: no user returned')
       }
 
-      const user = data.user
-
-      // Check if user has a PIN already created
-      const { data: pinData, error: pinError } = await supabase
-        .from('pins')
-        .select('id')
-        .eq('user_id', user.id)
-        .single()
-
-      if (pinError && pinError.code !== 'PGRST116') {
-        // PGRST116 means "no rows found" which is expected for new users
-        throw new Error('Failed to check PIN status')
-      }
-
-      // Redirect based on PIN status
-      if (!pinData) {
-        // No PIN exists, redirect to PIN creation
-        navigate('/create-pin', { replace: true })
-      } else {
-        // PIN exists, go to dashboard
-        navigate('/dashboard', { replace: true })
-      }
+      // Don't check PIN here - let App.tsx routing handle it
+      // The auth state change listener will trigger route updates
+      // Redirect to home and let App.tsx sort out the routing based on auth state
+      navigate('/', { replace: true })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed'
       setError(errorMessage)
