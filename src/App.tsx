@@ -27,7 +27,9 @@ export default function App() {
     const checkAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
-        setUser(session?.user ?? null)
+        const user = session?.user ?? null
+        console.log('[App Auth] Session check:', { hasSession: !!session, user: user?.email || 'none' })
+        setUser(user)
         
         // Always assume profile exists and PIN hasn't been created
         // These will be checked/created on-demand by the pages themselves
@@ -46,6 +48,7 @@ export default function App() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('[App Auth] onAuthStateChange:', { event, user: session?.user?.email || 'none' })
         setUser(session?.user ?? null)
         
         if (session?.user) {
@@ -76,6 +79,7 @@ export default function App() {
   }, [])
 
   if (loading) {
+    console.log('[App Render] Loading...')
     return (
       <div className="flex items-center justify-center h-screen bg-light dark:bg-dark">
         <div className="text-center">
@@ -85,6 +89,8 @@ export default function App() {
       </div>
     )
   }
+
+  console.log('[App Render] Routes - user:', user?.email || 'none', 'hasPin:', hasCreatedPin)
 
   return (
     <QueryClientProvider client={queryClient}>
