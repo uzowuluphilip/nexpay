@@ -83,8 +83,21 @@ export default function SignUpPage() {
       })
 
       if (!profileResponse.ok) {
-        const errorData = await profileResponse.json()
-        throw new Error(errorData.error || 'Failed to create profile')
+        try {
+          const errorData = await profileResponse.json()
+          throw new Error(errorData.error || `Failed to create profile (${profileResponse.status})`)
+        } catch (parseErr) {
+          // Response wasn't JSON, just use status
+          throw new Error(`Failed to create profile (HTTP ${profileResponse.status})`)
+        }
+      }
+
+      try {
+        const profileData = await profileResponse.json()
+        console.log('Profile created successfully:', profileData)
+      } catch (parseErr) {
+        // Response might not be JSON but that's okay if status was ok
+        console.log('Profile creation succeeded (no response body)')
       }
 
       // Show success message and redirect to login after brief delay
